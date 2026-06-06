@@ -16,7 +16,8 @@ const connectDB=require('./db/connect');
 const port=process.env.PORT || 5000;
 
 // * routers
-const authRoute=require('./routes/authRoute');
+const authRouter=require('./routes/authRoute');
+const userRouter=require('./routes/userRoute');
 
 
 
@@ -34,7 +35,8 @@ app.get("/",(req,res)=>{
     // console.log(req.signedCookies);
     res.send("Hello World");
 })
-app.use('/api/v1/auth',authRoute);
+app.use('/api/v1/auth',authRouter);
+app.use('/api/v1/users',userRouter)
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
