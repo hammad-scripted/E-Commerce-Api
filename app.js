@@ -1,5 +1,6 @@
 const express=require('express');
 const dotenv=require('dotenv');
+const morgan=require('morgan');
 const dns=require('dns/promises');
 require('express-async-errors');
 dns.setServers(['1.1.1.1']);
@@ -16,7 +17,8 @@ const port=process.env.PORT || 5000;
 
 //* middleware
 app.use(express.json());
-
+app.use(express.urlencoded({extended:true}));
+app.use(morgan('tiny'));
 
 
 app.get("/",(req,res)=>{
