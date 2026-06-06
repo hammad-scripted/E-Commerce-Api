@@ -5,5 +5,6 @@ const {getAllUsers,getSingleUser,updateUser,updateUserPassword,showCurrentUser}=
 
 
 router.get('/',getAllUsers);
+router.get('/:id',getSingleUser);
 
 module.exports=router

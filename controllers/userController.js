@@ -1,12 +1,25 @@
-
+const User=require('../models/User')
+const {StatusCodes}=require('http-status-codes');
+const {NotFoundError}=require('../errors');
 const getAllUsers=async(req,res)=>{
 
-    res.send('getAllUsers')
+    const users=await User.find({role:'user'}).select('-password ' )
+    .sort('-createdAt')
+    return res.status(StatusCodes.OK).json({users});
+
+
 }
 
 
 const getSingleUser=async(req,res)=>{
-    res.send("getSingleUser")
+    const {id}=req.params;
+
+    const user =await User.findOne({_id:id}).select('-password');
+    if(!user){
+        throw new NotFoundError(`No user with id:${id}`);
+    }
+    
+    return res.status(StatusCodes.OK).json({user});
 }
 
 const showCurrentUser=(req,res)=>{

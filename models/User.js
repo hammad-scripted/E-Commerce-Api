@@ -18,6 +18,8 @@ const userSchema=new Schema({
         default: 'user',
 
     }
+},{
+    timestamps: true
 })
 
 //? hash password using pre-hook
