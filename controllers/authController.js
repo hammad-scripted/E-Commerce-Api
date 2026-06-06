@@ -8,8 +8,18 @@ const {CustomAPIError}=require('../errors');
 const register=async(req,res)=>{
 
     const {name,email,password}=req.body;
-    const user=await User.create({name,email,password});
-    res.status(StatusCodes.CREATED).json({user});
+    // ? find the existing user
+    const existingUser=await User.findOne({email});
+    if(existingUser){
+        throw new BadRequestError('Email already in use');
+    }
+    // first generated user is admin
+
+    const isFirstAccount=await User.countDocuments({})===0; 
+    const role=isFirstAccount?'admin':'user';
+
+    const user=await User.create({name,email,password,role});
+    return res.status(StatusCodes.CREATED).json({user});
 
 }
 const login=async(req,res)=>{
