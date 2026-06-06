@@ -6,6 +6,7 @@ const {BadRequestError}=require('../errors');
 const {NotFoundError}=require('../errors');
 const {UnauthenticatedError}=require('../errors');
 const {CustomAPIError}=require('../errors');
+const {attachCookiesToResponse}=require('../utils/cookie');
 
 // * register
 const register=async(req,res)=>{
@@ -27,14 +28,13 @@ const register=async(req,res)=>{
 const userPayload={name:user.name,userId:user._id,role:user.role}
 const token=createJwtToken(userPayload);
 
+
+
 // * cookie
+attachCookiesToResponse(res,userPayload);
 
-res.cookie('refreshToken',token,{
-    httpOnly:true,
-    secure:true,
-    maxAge:1*24*60*60*1000
 
-})
+
     return res.status(StatusCodes.CREATED).json({user:userPayload});
 
 }

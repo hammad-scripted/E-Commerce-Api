@@ -28,6 +28,7 @@ app.use(cookieParser());
 
 
 app.get("/",(req,res)=>{
+    console.log(req.cookies);
     res.send("Hello World");
 })
 app.use('/api/v1/auth',authRoute);
