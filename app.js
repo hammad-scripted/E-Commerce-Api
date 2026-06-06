@@ -14,6 +14,9 @@ const app=express();
 const connectDB=require('./db/connect');
 const port=process.env.PORT || 5000;
 
+// * routers
+const authRoute=require('./routes/authRoute');
+
 
 //* middleware
 app.use(express.json());
@@ -24,7 +27,7 @@ app.use(morgan('tiny'));
 app.get("/",(req,res)=>{
     res.send("Hello World");
 })
-
+app.use('/api/v1/auth',authRoute);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
