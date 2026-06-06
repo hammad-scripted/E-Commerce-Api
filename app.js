@@ -2,6 +2,7 @@ const express=require('express');
 const dotenv=require('dotenv');
 const morgan=require('morgan');
 const dns=require('dns/promises');
+const cookieParser = require('cookie-parser');
 require('express-async-errors');
 dns.setServers(['1.1.1.1']);
 dotenv.config();
@@ -18,10 +19,12 @@ const port=process.env.PORT || 5000;
 const authRoute=require('./routes/authRoute');
 
 
+
 //* middleware
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(morgan('tiny'));
+app.use(cookieParser());
 
 
 app.get("/",(req,res)=>{

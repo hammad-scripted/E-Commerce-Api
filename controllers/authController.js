@@ -26,7 +26,16 @@ const register=async(req,res)=>{
 
 const userPayload={name:user.name,userId:user._id,role:user.role}
 const token=createJwtToken(userPayload);
-    return res.status(StatusCodes.CREATED).json({user:userPayload,token});
+
+// * cookie
+
+res.cookie('refreshToken',token,{
+    httpOnly:true,
+    secure:true,
+    maxAge:1*24*60*60*1000
+
+})
+    return res.status(StatusCodes.CREATED).json({user:userPayload});
 
 }
 const login=async(req,res)=>{
