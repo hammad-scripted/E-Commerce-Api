@@ -13,7 +13,7 @@ const register=async(req,res)=>{
     if(existingUser){
         throw new BadRequestError('Email already in use');
     }
-    // first generated user is admin
+    //? first generated user is admin
 
     const isFirstAccount=await User.countDocuments({})===0; 
     const role=isFirstAccount?'admin':'user';
