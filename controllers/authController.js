@@ -1,47 +1,65 @@
-const {createJwtToken}=require('../utils/token');
-const {isTokenValid}=require('../utils/token');
-const User=require('../models/User');
-const {StatusCodes}=require('http-status-codes');
-const {BadRequestError}=require('../errors');
-const {NotFoundError}=require('../errors');
-const {UnauthenticatedError}=require('../errors');
-const {CustomAPIError}=require('../errors');
-const {attachCookiesToResponse}=require('../utils/cookie');
+const { createJwtToken } = require('../utils/token');
+const { isTokenValid } = require('../utils/token');
+const User = require('../models/User');
+const { StatusCodes } = require('http-status-codes');
+const { BadRequestError } = require('../errors');
+const { NotFoundError } = require('../errors');
+const { UnauthenticatedError } = require('../errors');
+const { CustomAPIError } = require('../errors');
+const { attachCookiesToResponse } = require('../utils/cookie');
 
 // * register
-const register=async(req,res)=>{
+const register = async (req, res) => {
+  const { name, email, password } = req.body;
+  // ? find the existing user
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new BadRequestError('Email already in use');
+  }
+  //? first generated user is admin
 
-    const {name,email,password}=req.body;
-    // ? find the existing user
-    const existingUser=await User.findOne({email});
-    if(existingUser){
-        throw new BadRequestError('Email already in use');
-    }
-    //? first generated user is admin
+  const isFirstAccount = (await User.countDocuments({})) === 0;
+  const role = isFirstAccount ? 'admin' : 'user';
 
-    const isFirstAccount=await User.countDocuments({})===0; 
-    const role=isFirstAccount?'admin':'user';
+  const user = await User.create({ name, email, password, role });
+  // * jwt token
 
-    const user=await User.create({name,email,password,role});
-    // * jwt token
+  const userPayload = { name: user.name, userId: user._id, role: user.role };
+  const token = createJwtToken(userPayload);
 
-const userPayload={name:user.name,userId:user._id,role:user.role}
-const token=createJwtToken(userPayload);
+  // * cookie
+  attachCookiesToResponse(res, userPayload);
 
+  return res.status(StatusCodes.CREATED).json({ user: userPayload });
+};
+const login = async (req, res) => {
+  const { email, password } = req.body;
 
+  if (!email || !password) {
+    throw newBadRequestError('Please provide email and password');
+  }
 
-// * cookie
-attachCookiesToResponse(res,userPayload);
+  // ? find user
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new UnauthenticatedError('Invalid Credentials');
+  }
+  // ? compare password
+  const isPasswordCorrect = await user.comparePassword(password);
+  if (!isPasswordCorrect) {
+    throw new UnauthenticatedError('Invalid email or password');
+  }
 
-    return res.status(StatusCodes.CREATED).json({user:userPayload});
+  // ? everything is correct now attach cookie
 
-}
-const login=async(req,res)=>{
-    res.send("Login User");
-}
+  const userPayload = { name: user.name, userId: user._id, role: user.role };
+  const token = createJwtToken(userPayload);
+  attachCookiesToResponse(res, userPayload);
+  return res.status(StatusCodes.CREATED).json({ user: userPayload });
+};
 
-    const logout=async(req,res)=>{
-    res.send("Logout User");
-}
+const logout = async (req, res) => {
+  res.send('Logout User');
+};
 
-module.exports={register,login,logout}
+module.exports = { register, login, logout };
