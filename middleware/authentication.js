@@ -1,19 +1,21 @@
 // ? authentication middleware for cookie based authentication
 
-const {isTokenValid} = require('../utils/jwt');
+const {isTokenValid} = require('../utils/token');
 const { CustomError } = require('../errors');
+const {UnauthenticatedError}=require('../errors');
 
 
-const protect=(req,res,next)=>{
+const authenticateUser= async (req,res,next)=>{
 
-    const token=req.cookies.refreshToken;
+    const token=req.signedCookies.refreshToken;
     if(!token){
-        throw new CustomError.UnauthorizedError('Not authorized to access this route');
+        throw new UnauthenticatedError('Authentication invalid');
     
     }
-    const decoded=isTokenValid(token);
-    req.user=decoded.user;
+    const {decoded}=isTokenValid(token);
+    console.log(decoded);
+    req.user=decoded;
     next();
 
 }
-module.exports={protect};
+module.exports={authenticateUser};
