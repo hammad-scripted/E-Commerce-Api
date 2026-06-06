@@ -33,8 +33,6 @@ const token=createJwtToken(userPayload);
 // * cookie
 attachCookiesToResponse(res,userPayload);
 
-
-
     return res.status(StatusCodes.CREATED).json({user:userPayload});
 
 }

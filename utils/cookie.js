@@ -4,7 +4,8 @@ const attachCookiesToResponse = (res, user) => {
   const token = createJwtToken(user);
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production'?true:false,
+    signed: true,
     maxAge: 1 * 24 * 60 * 60 * 1000,
   });
 };
