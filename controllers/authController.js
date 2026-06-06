@@ -36,7 +36,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw newBadRequestError('Please provide email and password');
+    throw new BadRequestError('Please provide email and password');
   }
 
   // ? find user
@@ -55,11 +55,15 @@ const login = async (req, res) => {
   const userPayload = { name: user.name, userId: user._id, role: user.role };
   const token = createJwtToken(userPayload);
   attachCookiesToResponse(res, userPayload);
-  return res.status(StatusCodes.CREATED).json({ user: userPayload });
+  return res.status(StatusCodes.OK).json({ user: userPayload });
 };
 
 const logout = async (req, res) => {
-  res.send('Logout User');
+    res.cookie('refreshToken'," logout",{
+        expires: new Date(Date.now()+5*1000),
+        httpOnly: true
+    })
+   
 };
 
 module.exports = { register, login, logout };
