@@ -3,7 +3,7 @@
 const {isTokenValid} = require('../utils/token');
 const { CustomError } = require('../errors');
 const {UnauthenticatedError}=require('../errors');
-
+const {UnauthorizedError}=require('../errors');
 
 const authenticateUser= async (req,res,next)=>{
 
@@ -12,10 +12,20 @@ const authenticateUser= async (req,res,next)=>{
         throw new UnauthenticatedError('Authentication invalid');
     
     }
-    const {decoded}=isTokenValid(token);
+    const decoded=isTokenValid(token);
     console.log(decoded);
-    req.user=decoded;
+    req.user=decoded.user;
     next();
 
 }
-module.exports={authenticateUser};
+
+ const authorizePermissions=(req,res,next)=>{
+    console.log(`admin route`);
+
+    if(req.user.role!=='admin'){
+        throw new UnauthorizedError('Unauthorized to access this route')
+    }
+    next()
+
+ }
+module.exports={authenticateUser,authorizePermissions};

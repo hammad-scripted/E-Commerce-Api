@@ -64,6 +64,7 @@ const logout = async (req, res) => {
         httpOnly: true
     })
    
+    res.status(StatusCodes.OK).json({msg:"user logged out"});
 };
 
 module.exports = { register, login, logout };
