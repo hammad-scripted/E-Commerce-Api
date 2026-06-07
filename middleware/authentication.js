@@ -19,13 +19,22 @@ const authenticateUser= async (req,res,next)=>{
 
 }
 
- const authorizePermissions=(req,res,next)=>{
-    console.log(`admin route`);
+ const authorizePermissions=(...roles)=>{
 
-    if(req.user.role!=='admin'){
-        throw new UnauthorizedError('Unauthorized to access this route')
+    console.log(roles)
+    //? roles=['admin','user']
+    //? remember js concept of hof and callback,and this is inner function remember the outer function and this is know as closure in js
+
+    return (req,res,next)=>{
+
+        if(!roles.includes(req.user.role)){
+            throw new UnauthorizedError("Unauthorized to access this route")
+
+        }
+        next();
+
     }
-    next()
+   
 
  }
 module.exports={authenticateUser,authorizePermissions};
