@@ -18,6 +18,7 @@ const port=process.env.PORT || 5000;
 // * routers
 const authRouter=require('./routes/authRoute');
 const userRouter=require('./routes/userRoute');
+const productRouter=require('./routes/productRoute');
 
 
 
@@ -37,6 +38,7 @@ app.get("/",(req,res)=>{
 })
 app.use('/api/v1/auth',authRouter);
 app.use('/api/v1/users',userRouter)
+app.use('/api/v1/products',productRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
