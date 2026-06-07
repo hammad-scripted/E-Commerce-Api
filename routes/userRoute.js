@@ -6,7 +6,7 @@ const {authenticateUser,authorizePermissions}=require('../middleware/authenticat
 const {getAllUsers,getSingleUser,updateUser,updateUserPassword,showCurrentUser}=require('../controllers/userController');
 
 
-router.get('/',authenticateUser,authorizePermissions('admin','user'),getAllUsers);
+router.get('/',authenticateUser,authorizePermissions('admin'),getAllUsers);
 router.get('/showMe',authenticateUser,showCurrentUser);
 router.patch('/updateUser',authenticateUser,updateUser);
 router.patch('/updateUserPassword',authenticateUser,updateUserPassword);

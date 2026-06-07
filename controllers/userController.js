@@ -5,6 +5,7 @@ const {BadRequestError}=require('../errors');
 const {UnauthenticatedError}=require('../errors');
 const {createJwtToken}=require('../utils/token');
 const {attachCookiesToResponse}=require('../utils/cookie');
+const {checkPermissions}=require('../utils/checkPermissions');
 const getAllUsers=async(req,res)=>{
 
     const users=await User.find({role:'user'}).select('-password ' )
@@ -22,7 +23,7 @@ const getSingleUser=async(req,res)=>{
     if(!user){
         throw new NotFoundError(`No user with id:${id}`);
     }
-    
+    checkPermissions(req.user,user._id);
     return res.status(StatusCodes.OK).json({user});
 }
 
