@@ -2,13 +2,14 @@ const express=require('express');
 const router=express.Router();
 const {authenticateUser,authorizePermissions}=require('../middleware/authentication');
 
+
 const {getAllUsers,getSingleUser,updateUser,updateUserPassword,showCurrentUser}=require('../controllers/userController');
 
 
 router.get('/',authenticateUser,authorizePermissions('admin','user'),getAllUsers);
+router.get('/showMe',authenticateUser,showCurrentUser);
+router.patch('/updateUser',authenticateUser,updateUser);
+router.patch('/updateUserPassword',authenticateUser,updateUserPassword);
 router.get('/:id',authenticateUser,getSingleUser);
-router.get('/showMe',showCurrentUser);
-router.patch('/updateUser',updateUser);
-router.patch('/updateUserPassword',updateUserPassword);
 
 module.exports=router

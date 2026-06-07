@@ -25,7 +25,7 @@ const register = async (req, res) => {
   // * jwt token
 
   const userPayload = { name: user.name, userId: user._id, role: user.role };
-  const token = createJwtToken(userPayload);
+  // const token = createJwtToken(userPayload);
 
   // * cookie
   attachCookiesToResponse(res, userPayload);
