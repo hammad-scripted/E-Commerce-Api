@@ -3,6 +3,7 @@ const dotenv=require('dotenv');
 const morgan=require('morgan');
 const dns=require('dns/promises');
 const cookieParser = require('cookie-parser');
+const fileUpload=require('express-fileupload');
 require('express-async-errors');
 dns.setServers(['1.1.1.1']);
 dotenv.config();
@@ -30,6 +31,12 @@ app.use(cookieParser(
     process.env.JWT_SECRET
 ));
 
+
+app.use(fileUpload({
+    useTempFiles:true,
+    tempFileDir:'/tmp/',
+    
+}));
 
 app.get("/",(req,res)=>{
     // console.log(req.cookies);
