@@ -31,4 +31,8 @@ const reviewSchema=new Schema({
     }
 },{timestamps:true});
 
+// * compound indexing 
+// ? only one review per user per product
+reviewSchema.index({product:1,user:1},{unique:true} );
+
 model.exports=model('Review',reviewSchema);
