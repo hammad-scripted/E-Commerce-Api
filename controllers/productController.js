@@ -1,24 +1,28 @@
 const Product = require('../models/Product');
-
+const {StatusCodes}=require('http-status-codes');
 const getAllProducts = async (req, res) => {
-  console.log('getAllProducts');
+  res.send('getAllProducts');
 };
 
 const getSingleProduct = async (req, res) => {
-  console.log('getSingleProduct');
+  res.send('getSingleProduct');
 };
 const deleteProduct = async (req, res) => {
-  console.log('deleteProduct');
+  res.send('deleteProduct');
 };
 
 const updateProduct = async (req, res) => {
-  console.log('updateProduct');
+  res.send('updateProduct');
 };
 const uploadImage = async (req, res) => {
-  console.log('uploadImage');
+  res.send('uploadImage');
 };
 const createProduct = async (req, res) => {
-  console.log('createProduct');
+ 
+ req.body.user=req.user.userId;
+
+  const product =await Product.create(req.body);
+  res.status(StatusCodes.CREATED).json({product});
 };
 
 module.exports = {
