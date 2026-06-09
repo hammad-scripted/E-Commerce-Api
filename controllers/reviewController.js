@@ -1,12 +1,21 @@
+const Review=require('../models/Review');
+const {StatusCodes}=require('http-status-codes');
 const createReview=async(req,res)=>{
     res.send('create review')
 }
 
 const getSingleReview=async(req,res)=>{
-    res.send('get single review')
+    const {id:reviewId}=req.params;
+   const review=await Review.findOne({_id:reviewId});
+   if(!review){
+    throw new NotFoundError(`No review with id:${reviewId}`);
+   }
+   res.status(StatusCodes.OK).json({review});
 }
 const getAllReviews=async(req,res)=>{
-    res.send('get all reviews')
+    const reviews=await Review.find({});
+    res.status(StatusCodes.OK).json({reviews});
+    
 }
 const updateReview=async(req,res)=>{
     res.send('update review')
