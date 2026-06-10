@@ -1,7 +1,9 @@
 const Review=require('../models/Review');
 const {StatusCodes}=require('http-status-codes');
 const createReview=async(req,res)=>{
-    res.send('create review')
+   
+    const updatedReview=Review.findAndUpdate(req.body);
+    res.status(StatusCodes.OK).json({updatedReview});
 }
 
 const getSingleReview=async(req,res)=>{
