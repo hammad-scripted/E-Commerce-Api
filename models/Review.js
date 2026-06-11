@@ -1,4 +1,4 @@
-const {mongoose,Schema,model}=require('mongoose');
+const {Schema,model}=require('mongoose');
 
 const reviewSchema=new Schema({
     rating:{
@@ -35,4 +35,4 @@ const reviewSchema=new Schema({
 // ? only one review per user per product
 reviewSchema.index({product:1,user:1},{unique:true} );
 
-model.exports=model('Review',reviewSchema);
+module.exports=model('Review',reviewSchema);

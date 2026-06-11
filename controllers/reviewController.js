@@ -2,11 +2,24 @@ const Review = require('../models/Review');
 const Product = require('../models/Product');
 const { NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
+const { BadRequestError } = require('../errors');
 const { authorizePermissions } = require('../middleware/authentication');
 const { checkPermissions } = require('../utils/checkPermissions');
 
 const createReview = async (req, res) => {
-  const { productId: productId } = req.params;
+  const { product: productId } = req.body;
+  if(!productId) throw new BadRequestError("Please provide product id");
+
+  const product = await Product.findOne({ _id: productId });
+  if (!product) {
+    throw new NotFoundError(`No product with id:${productId}`);
+  }
+
+  const alreadySubmitted=await Review.findOne({product:productId,user:req.user.userId});
+  if(alreadySubmitted){
+    throw new BadRequestError("You have already submitted a review for this product");
+  }
+
   req.body.user = req.user.userId;
   const review = await Review.create(req.body);
 
