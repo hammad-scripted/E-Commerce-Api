@@ -15,6 +15,7 @@ const createReview = async (req, res) => {
     throw new NotFoundError(`No product with id:${productId}`);
   }
 
+//   ? check if user has already submitted a review
   const alreadySubmitted=await Review.findOne({product:productId,user:req.user.userId});
   if(alreadySubmitted){
     throw new BadRequestError("You have already submitted a review for this product");
@@ -32,14 +33,26 @@ const getSingleReview = async (req, res) => {
   if (!review) {
     throw new NotFoundError(`No review with id:${reviewId}`);
   }
-  res.status(StatusCodes.OK).json({ review });
+ return  res.status(StatusCodes.OK).json({ review });
 };
 const getAllReviews = async (req, res) => {
   const reviews = await Review.find({});
-  res.status(StatusCodes.OK).json({ reviews });
+ return  res.status(StatusCodes.OK).json({ reviews });
 };
 const updateReview = async (req, res) => {
-  res.send('update review');
+  const {id:reviewId}=req.params;
+
+  if(!id){
+    throw new BadRequestError("Please provide review id");
+  }
+  const review = await Review.findOne({ _id: reviewId });
+  if (!review) {
+    throw new NotFoundError(`No review with id:${reviewId}`);
+  }
+checkPermissions(req.user,review.user);
+const updatedReview=await Review.findOneAndUpdate({_id:reviewId},req.body,{new:true,runValidators:true});
+return res.status(StatusCodes.OK).json({updatedReview});
+
 };
 const deleteReview = async (req, res) => {
   const { id: reviewId } = req.params;
