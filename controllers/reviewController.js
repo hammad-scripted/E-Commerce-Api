@@ -29,14 +29,20 @@ const createReview = async (req, res) => {
 
 const getSingleReview = async (req, res) => {
   const { id: reviewId } = req.params;
-  const review = await Review.findOne({ _id: reviewId });
+  const review = await Review.findOne({ _id: reviewId }).populate({
+    path: 'product',
+    select: 'name company price',
+});
   if (!review) {
     throw new NotFoundError(`No review with id:${reviewId}`);
   }
  return  res.status(StatusCodes.OK).json({ review });
 };
 const getAllReviews = async (req, res) => {
-  const reviews = await Review.find({});
+  const reviews = await Review.find({}).populate({
+    path: 'product',
+    select: 'name company price',
+  });
  return  res.status(StatusCodes.OK).json({ reviews });
 };
 const updateReview = async (req, res) => {
