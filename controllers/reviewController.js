@@ -42,7 +42,7 @@ const getAllReviews = async (req, res) => {
 const updateReview = async (req, res) => {
   const {id:reviewId}=req.params;
 
-  if(!id){
+  if(!reviewId){
     throw new BadRequestError("Please provide review id");
   }
   const review = await Review.findOne({ _id: reviewId });
@@ -57,10 +57,15 @@ return res.status(StatusCodes.OK).json({updatedReview});
 const deleteReview = async (req, res) => {
   const { id: reviewId } = req.params;
 
+  if(!reviewId){
+    throw new BadRequestError("Please provide review id");
+  }
+
   const review = await Review.findOne({ _id: reviewId });
   if (!review) {
     throw new NotFoundError(`No review with id:${reviewId}`);
   }
+  checkPermissions(req.user,review.user);
   await review.remove();
   res.status(StatusCodes.OK).json({ msg: 'review deleted' });
 };
