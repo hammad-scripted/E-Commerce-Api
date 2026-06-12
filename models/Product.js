@@ -24,6 +24,7 @@ const productSchema = new Schema(
     image: {
       type: String,
       default: 'no-image.jpg',
+      
     },
 
     category: {

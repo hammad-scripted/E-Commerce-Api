@@ -74,6 +74,19 @@ const uploadImage = async (req, res) => {
 const createProduct = async (req, res) => {
  
  req.body.user=req.user.userId;
+///// image upload logic
+
+  if (!req.files || !req.files.image) {
+    throw new BadRequestError('No file uploaded');
+  }
+  const file=req.files.image;
+  if(!file.mimetype.startsWith('image')){
+    throw new BadRequestError('Please upload image file');
+  }
+  const result=await cloudinary.uploader.upload(file.tempFilePath,{folder:'products'});
+  req.body.image=result.secure_url;
+  req.body.imagePublicId=result.public_id;
+  
 
   const product =await Product.create(req.body);
   res.status(StatusCodes.CREATED).json({product});
