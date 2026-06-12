@@ -23,7 +23,7 @@ const productSchema = new Schema(
 
     image: {
       type: String,
-    default:'no-image.jpg'
+      default: 'no-image.jpg',
     },
 
     category: {
@@ -67,6 +67,10 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
+    numOfReviews: {
+      type: Number,
+      default: 0,
+    },
 
     // one user can create many products
     user: {
@@ -79,21 +83,21 @@ const productSchema = new Schema(
   {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }, 
-  }
+    toObject: { virtuals: true },
+  },
 );
-// ** virtuals 
-productSchema.virtual('reviews',{
-  ref:'Review',
-  localField:'_id',
-  foreignField:'product',
-  justOne:false
-
-})
+// ** virtuals
+productSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'product',
+  justOne: false,
+});
 // ** middleware
-productSchema.pre('remove',async function(next){
-  await this.model('Review').deleteMany({product:this._id});
+// ** middleware to delete associated reviews when a product is removed
+productSchema.pre('remove', async function (next) {
+  await this.model('Review').deleteMany({ product: this._id });
   next();
-})
+});
 
 module.exports = model('Product', productSchema);

@@ -35,4 +35,14 @@ const reviewSchema=new Schema({
 // ? only one review per user per product
 reviewSchema.index({product:1,user:1},{unique:true} );
 
+reviewSchema.post("save",async function(next){
+    console.log(this);
+    console.log('just saved a review')
+
+})
+reviewSchema.post("remove",async function(next){
+    console.log(this);
+    console.log('just removed a review')
+})
+
 module.exports=model('Review',reviewSchema);

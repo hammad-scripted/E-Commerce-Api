@@ -56,7 +56,12 @@ const updateReview = async (req, res) => {
     throw new NotFoundError(`No review with id:${reviewId}`);
   }
 checkPermissions(req.user,review.user);
-const updatedReview=await Review.findOneAndUpdate({_id:reviewId},req.body,{new:true,runValidators:true});
+
+review.rating=req.body.rating;
+review.title=req.body.title;
+review.comment=req.body.comment;
+
+const updatedReview=await review.save();
 return res.status(StatusCodes.OK).json({updatedReview});
 
 };
