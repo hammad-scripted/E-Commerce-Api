@@ -64,6 +64,13 @@ app.get('/api-docs.json', (req, res) => {
 });
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
   customSiteTitle: 'E-Commerce API Docs',
+  swaggerOptions: {
+    withCredentials: true,
+    requestInterceptor: (req) => {
+      req.credentials = 'include';
+      return req;
+    },
+  },
   customCss: `
     .swagger-ui .topbar { display: none; }
     .swagger-ui .info { margin: 32px 0; }
