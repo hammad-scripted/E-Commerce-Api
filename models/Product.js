@@ -90,5 +90,10 @@ productSchema.virtual('reviews',{
   justOne:false
 
 })
+// ** middleware
+productSchema.pre('remove',async function(next){
+  await this.model('Review').deleteMany({product:this._id});
+  next();
+})
 
 module.exports = model('Product', productSchema);
