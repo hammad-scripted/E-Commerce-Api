@@ -78,7 +78,17 @@ const productSchema = new Schema(
 
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }, 
   }
 );
+
+productSchema.virtual('reviews',{
+  ref:'Review',
+  localField:'_id',
+  foreignField:'product',
+  justOne:false
+
+})
 
 module.exports = model('Product', productSchema);
