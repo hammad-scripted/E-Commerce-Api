@@ -1,0 +1,1580 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "E-Commerce API",
+    "version": "1.0.0",
+    "description": "A complete Express and MongoDB e-commerce API for authentication, users, products, reviews, and orders."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local development"
+    },
+    {
+      "url": "https://your-render-app.onrender.com",
+      "description": "Render deployment"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Basic API status"
+    },
+    {
+      "name": "Auth",
+      "description": "Register, login, and logout"
+    },
+    {
+      "name": "Users",
+      "description": "User account and profile operations"
+    },
+    {
+      "name": "Products",
+      "description": "Product catalog and product image upload"
+    },
+    {
+      "name": "Reviews",
+      "description": "Product review management"
+    },
+    {
+      "name": "Orders",
+      "description": "Order creation, lookup, and payment status"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "API health check",
+        "responses": {
+          "200": {
+            "description": "API is running",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Hello World"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "description": "Creates a user account. The first registered account becomes an admin.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInput"
+              },
+              "example": {
+                "name": "susan",
+                "email": "susan.unique@gmail.com",
+                "password": "susan@123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered and authentication cookie set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login user",
+        "description": "Authenticates a user and sets the auth cookie.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginInput"
+              },
+              "example": {
+                "email": "chris.unique@gmail.com",
+                "password": "chris@123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Logout current user",
+        "responses": {
+          "200": {
+            "description": "User logged out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                },
+                "example": {
+                  "msg": "user logged out"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users",
+        "description": "Admin-only endpoint that returns non-admin users.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/users/showMe": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Show current user",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authenticated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          }
+        }
+      }
+    },
+    "/api/v1/users/updateUser": {
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Update current user profile",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserInput"
+              },
+              "example": {
+                "email": "susan.scripted@gmail.com",
+                "name": "lily susan"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          }
+        }
+      }
+    },
+    "/api/v1/users/updateUserPassword": {
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Update current user password",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePasswordInput"
+              },
+              "example": {
+                "oldPassword": "susan@123",
+                "newPassword": "susan@1234"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user by id",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Single user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products",
+        "responses": {
+          "200": {
+            "description": "Product list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "example": 3
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Products"],
+        "summary": "Create product",
+        "description": "Admin-only endpoint. Upload the product image together with product fields.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductFormInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/products/uploadImage": {
+      "post": {
+        "tags": ["Products"],
+        "summary": "Upload product image",
+        "description": "Admin-only endpoint that uploads an image to Cloudinary.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/products/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get product by id",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Single product",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Products"],
+        "summary": "Update product",
+        "description": "Admin-only endpoint.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductInput"
+              },
+              "example": {
+                "name": "Study Desk",
+                "price": 2000
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updatedProduct": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Products"],
+        "summary": "Delete product",
+        "description": "Admin-only endpoint.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                },
+                "example": {
+                  "msg": "product deleted"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/products/{id}/reviews": {
+      "get": {
+        "tags": ["Products", "Reviews"],
+        "summary": "Get reviews for a product",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reviews for the product",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "reviews": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "example": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "Get all reviews",
+        "responses": {
+          "200": {
+            "description": "Review list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "reviews": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Reviews"],
+        "summary": "Create review",
+        "description": "Authenticated users can create one review per product.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewInput"
+              },
+              "example": {
+                "product": "6a26f8ee3d5e2b4ced2599ea",
+                "title": "poor product",
+                "comment": "very very bad product",
+                "rating": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "review": {
+                      "$ref": "#/components/schemas/Review"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/reviews/{id}": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "Get review by id",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Single review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "review": {
+                      "$ref": "#/components/schemas/Review"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Reviews"],
+        "summary": "Update review",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewInput"
+              },
+              "example": {
+                "title": "Great product",
+                "comment": "superb usecase",
+                "rating": 4.7
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Review updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updatedReview": {
+                      "$ref": "#/components/schemas/Review"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Reviews"],
+        "summary": "Delete review",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                },
+                "example": {
+                  "msg": "review deleted"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/orders": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get all orders",
+        "description": "Admin-only endpoint.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orders": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Order"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "example": 4
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Create order",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "order": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "clientSecret": {
+                      "type": "string",
+                      "example": "someRandomValue"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/orders/showAllMyOrders": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get current user's orders",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders for the current user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orders": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Order"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{id}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get order by id",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Single order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "order": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Orders"],
+        "summary": "Mark order as paid",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "order": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refreshToken",
+        "description": "Authentication cookie set by register/login."
+      }
+    },
+    "parameters": {
+      "IdParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "6a26fc2a27494bb61a16df24"
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthenticated": {
+        "description": "Authentication is required or credentials are invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The current user does not have permission",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "RegisterInput": {
+        "type": "object",
+        "required": ["name", "email", "password"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "susan"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "susan.unique@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "susan@123"
+          }
+        }
+      },
+      "LoginInput": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "chris.unique@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "chris@123"
+          }
+        }
+      },
+      "UpdateUserInput": {
+        "type": "object",
+        "required": ["name", "email"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "lily susan"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "susan.scripted@gmail.com"
+          }
+        }
+      },
+      "UpdatePasswordInput": {
+        "type": "object",
+        "required": ["oldPassword", "newPassword"],
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "example": "susan@123"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 6,
+            "example": "susan@1234"
+          }
+        }
+      },
+      "ProductFormInput": {
+        "type": "object",
+        "required": ["image", "name", "price", "description", "company"],
+        "properties": {
+          "image": {
+            "type": "string",
+            "format": "binary"
+          },
+          "name": {
+            "type": "string",
+            "example": "Modern Chair"
+          },
+          "price": {
+            "type": "number",
+            "example": 15000
+          },
+          "description": {
+            "type": "string",
+            "example": "Comfortable office chair"
+          },
+          "company": {
+            "type": "string",
+            "enum": ["ikea", "liddy", "marcos", "caressa"],
+            "example": "ikea"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["office", "kitchen", "bedroom"],
+            "example": "office"
+          },
+          "colors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["#222"]
+          },
+          "featured": {
+            "type": "boolean",
+            "example": false
+          },
+          "freeShipping": {
+            "type": "boolean",
+            "example": false
+          },
+          "inventory": {
+            "type": "number",
+            "example": 15
+          }
+        }
+      },
+      "UpdateProductInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Study Desk"
+          },
+          "price": {
+            "type": "number",
+            "example": 2000
+          },
+          "description": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string",
+            "enum": ["ikea", "liddy", "marcos", "caressa"]
+          },
+          "category": {
+            "type": "string",
+            "enum": ["office", "kitchen", "bedroom"]
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "freeShipping": {
+            "type": "boolean"
+          },
+          "inventory": {
+            "type": "number"
+          }
+        }
+      },
+      "ReviewInput": {
+        "type": "object",
+        "required": ["product", "title", "comment", "rating"],
+        "properties": {
+          "product": {
+            "type": "string",
+            "example": "6a26f8ee3d5e2b4ced2599ea"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "poor product"
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 1000,
+            "example": "very very bad product"
+          },
+          "rating": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 1
+          }
+        }
+      },
+      "UpdateReviewInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Great product"
+          },
+          "comment": {
+            "type": "string",
+            "example": "superb usecase"
+          },
+          "rating": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 4.7
+          }
+        }
+      },
+      "CreateOrderInput": {
+        "type": "object",
+        "required": ["items", "tax", "shippingFee"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItemInput"
+            }
+          },
+          "tax": {
+            "type": "number",
+            "example": 499
+          },
+          "shippingFee": {
+            "type": "number",
+            "example": 799
+          }
+        },
+        "example": {
+          "items": [
+            {
+              "product": "6a26fc2a27494bb61a16df24",
+              "amount": 2
+            }
+          ],
+          "tax": 499,
+          "shippingFee": 799
+        }
+      },
+      "CartItemInput": {
+        "type": "object",
+        "required": ["product", "amount"],
+        "properties": {
+          "product": {
+            "type": "string",
+            "example": "6a26fc2a27494bb61a16df24"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 2
+          }
+        }
+      },
+      "UpdateOrderInput": {
+        "type": "object",
+        "required": ["paymentIntentId"],
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "example": "pi_3NXExample"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/AuthUser"
+          }
+        }
+      },
+      "AuthUser": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "susan"
+          },
+          "userId": {
+            "type": "string",
+            "example": "6a246e23ad9aea39ebc78740"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["admin", "user"],
+            "example": "user"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6a246e23ad9aea39ebc78740"
+          },
+          "name": {
+            "type": "string",
+            "example": "susan"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "susan.unique@gmail.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["admin", "user"],
+            "example": "user"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6a26fc2a27494bb61a16df24"
+          },
+          "name": {
+            "type": "string",
+            "example": "Modern Chair"
+          },
+          "price": {
+            "type": "number",
+            "example": 15000
+          },
+          "description": {
+            "type": "string",
+            "example": "Comfortable office chair"
+          },
+          "image": {
+            "type": "string",
+            "example": "https://res.cloudinary.com/demo/image/upload/products/chair.jpg"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["office", "kitchen", "bedroom"],
+            "example": "office"
+          },
+          "company": {
+            "type": "string",
+            "enum": ["ikea", "liddy", "marcos", "caressa"],
+            "example": "ikea"
+          },
+          "colors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["#222"]
+          },
+          "featured": {
+            "type": "boolean",
+            "example": false
+          },
+          "freeShipping": {
+            "type": "boolean",
+            "example": false
+          },
+          "inventory": {
+            "type": "number",
+            "example": 15
+          },
+          "averageRating": {
+            "type": "number",
+            "example": 4
+          },
+          "numOfReviews": {
+            "type": "number",
+            "example": 8
+          },
+          "user": {
+            "type": "string",
+            "example": "6a246e23ad9aea39ebc78740"
+          }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6a2af74a65a6cec3e6b7c8f0"
+          },
+          "rating": {
+            "type": "number",
+            "example": 4.7
+          },
+          "title": {
+            "type": "string",
+            "example": "Great product"
+          },
+          "comment": {
+            "type": "string",
+            "example": "superb usecase"
+          },
+          "user": {
+            "type": "string",
+            "example": "6a246e23ad9aea39ebc78740"
+          },
+          "product": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6a2b2f79f014d2a7c9a11123"
+          },
+          "tax": {
+            "type": "number",
+            "example": 499
+          },
+          "shippingFee": {
+            "type": "number",
+            "example": 799
+          },
+          "subtotal": {
+            "type": "number",
+            "example": 30000
+          },
+          "total": {
+            "type": "number",
+            "example": 31298
+          },
+          "OrderItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "failed", "paid", "delivered", "cancelled"],
+            "example": "pending"
+          },
+          "user": {
+            "type": "string",
+            "example": "6a246e23ad9aea39ebc78740"
+          },
+          "clientSecret": {
+            "type": "string",
+            "example": "someRandomValue"
+          },
+          "paymentIntentId": {
+            "type": "string",
+            "example": "pi_3NXExample"
+          }
+        }
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "example": "https://res.cloudinary.com/demo/image/upload/products/chair.jpg"
+          },
+          "name": {
+            "type": "string",
+            "example": "Modern Chair"
+          },
+          "price": {
+            "type": "number",
+            "example": 15000
+          },
+          "amount": {
+            "type": "integer",
+            "example": 2
+          },
+          "product": {
+            "type": "string",
+            "example": "6a26fc2a27494bb61a16df24"
+          }
+        }
+      },
+      "ImageUploadResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "src": {
+                "type": "string",
+                "example": "https://res.cloudinary.com/demo/image/upload/products/chair.jpg"
+              },
+              "public_id": {
+                "type": "string",
+                "example": "products/chair"
+              }
+            }
+          }
+        }
+      },
+      "MessageResponse": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "example": "success"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "example": "Something went wrong"
+          }
+        }
+      }
+    }
+  }
+}

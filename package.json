@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "build": "echo \"No build step required\""
   },
   "author": "",
   "license": "ISC",
@@ -26,13 +27,15 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.8",
     "morgan": "^1.10.0",
+    "swagger-ui-express": "^5.0.1",
     "validator": "^13.6.0",
     "xss-clean": "^0.1.1"
   },
   "engines": {
-    "node": "14.x"
+    "node": "18.x"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "postman-to-openapi": "^1.7.3"
   }
 }
