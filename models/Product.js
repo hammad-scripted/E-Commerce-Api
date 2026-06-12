@@ -82,7 +82,7 @@ const productSchema = new Schema(
     toObject: { virtuals: true }, 
   }
 );
-
+// ** virtuals 
 productSchema.virtual('reviews',{
   ref:'Review',
   localField:'_id',
